@@ -1,6 +1,7 @@
 import ast
 import re
 from copy import copy
+from functools import reduce
 from typing import Set, Callable
 
 CAMEL_PATTERN = re.compile(r"(?<!^)(?=[A-Z])")
@@ -42,16 +43,17 @@ def camel_to_snake(word: str) -> str:
     return word if word.isupper() else CAMEL_PATTERN.sub("_", word).lower()
 
 
-def format(source: str, converter: Callable[[str], str]) -> str:
-    dest = copy(source)
-    for name in get_names_to_format(source):
-        dest = re.sub(name, converter(name), dest)
-    return dest
+def convert(source: str, converter: Callable[[str], str]) -> str:
+    return reduce(
+        lambda src, name: re.sub(name, converter(name), src),
+        get_names_to_format(source),
+        copy(source),
+    )
 
 
 def to_camel(snake_source: str) -> str:
-    return format(snake_source, snake_to_camel)
+    return convert(snake_source, snake_to_camel)
 
 
 def to_snake(camel_module: str) -> str:
-    return format(camel_module, camel_to_snake)
+    return convert(camel_module, camel_to_snake)
