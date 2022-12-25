@@ -1,7 +1,9 @@
 import ast
 import re
 from copy import copy
-from typing import Set
+from typing import Set, Callable
+
+CAMEL_PATTERN = re.compile(r"(?<!^)(?=[A-Z])")
 
 
 class FindNamesToFormat(ast.NodeVisitor):
@@ -36,8 +38,20 @@ def snake_to_camel(word: str) -> str:
     return tokens[0] + "".join(x.title() for x in tokens[1:])
 
 
-def to_camel(source: str) -> str:
-    camel_source = copy(source)
+def camel_to_snake(word: str) -> str:
+    return word if word.isupper() else CAMEL_PATTERN.sub("_", word).lower()
+
+
+def format(source: str, converter: Callable[[str], str]) -> str:
+    dest = copy(source)
     for name in get_names_to_format(source):
-        camel_source = re.sub(name, snake_to_camel(name), camel_source)
-    return camel_source
+        dest = re.sub(name, converter(name), dest)
+    return dest
+
+
+def to_camel(snake_source: str) -> str:
+    return format(snake_source, snake_to_camel)
+
+
+def to_snake(camel_module: str) -> str:
+    return format(camel_module, camel_to_snake)
