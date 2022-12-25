@@ -1,7 +1,7 @@
 # Code Style Formatter
 A small tool for converting between snake and camel case naming conventions.
 
-## Example
+## Examples
 ### Snake to Camel Case
 ```python
 # Snake case source
